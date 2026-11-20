@@ -22,6 +22,8 @@ python skills/foliodelta/scripts/compare.py skills/foliodelta/examples/before.cs
 
 The totals are 169.75 and 123.25 USD. Those three changes account for the −46.50 USD file difference. To investigate a refund claim, check the export filters and consult the order's refund transactions. The exports alone leave that explanation open.
 
+For a team handoff, the report also groups **all** affected orders, including those beyond the first ten displayed. Each group shows its count, increases and decreases separately, a suggested colleague and the evidence to request. This makes offsetting changes visible even when the grand total matches. [Merchant handoff scenarios](skills/foliodelta/references/merchant-handoff.md)
+
 ## Use with Codex
 
 ```sh

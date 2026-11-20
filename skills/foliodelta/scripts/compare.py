@@ -19,6 +19,14 @@ class InputIssue(ValueError):
     pass
 
 
+REVIEW_STEPS = {
+    "left_only": ("Order operations", "Find the order in the source store and check the right export's filters and cutoff."),
+    "right_only": ("Order operations", "Find the order in the source store and check the left export's filters and cutoff."),
+    "amount_changed": ("Payments or order operations", "Compare the order edit history and successful refund transactions by order, amount and currency."),
+    "time_only": ("Reporting operations", "Compare the source creation timestamp, timezone and reporting cutoff."),
+}
+
+
 def read_orders(path, side):
     row = 1
 
@@ -100,12 +108,24 @@ def compare(left_path, right_path, confirmed=False):
         changes.append(dict(order=key, kind="changed" if a and b else "left_only" if a else "right_only",
                             left=evidence(a), right=evidence(b), delta_minor=delta))
     changes.sort(key=lambda change: (-abs(change["delta_minor"]), change["order"]))
+    groups = {}
+    for change in changes:
+        category = change["kind"]
+        delta = change["delta_minor"]
+        if category == "changed":
+            category = "amount_changed" if delta else "time_only"
+        role, check = REVIEW_STEPS[category]
+        group = groups.setdefault(category, dict(count=0, increase_minor=0, decrease_minor=0,
+                                                  suggested_role=role, next_check=check))
+        group["count"] += 1
+        group["increase_minor"] += max(0, delta)
+        group["decrease_minor"] += min(0, delta)
     left_total = sum(record[1] for record in left.values())
     right_total = sum(record[1] for record in right.values())
     return dict(schema="foliodelta/1", scope="operator_declared" if confirmed else "unconfirmed",
                 currency=lu or ru, precision=PRECISION[lu or ru], left_count=len(left), right_count=len(right),
                 left_minor=left_total, right_minor=right_total, delta_minor=right_total-left_total,
-                changes=changes, next_check="Verify export filters, window, status and total definition; trace the listed orders in the source.",
+                changes=changes, review_groups=groups, next_check="Verify export filters, window, status and total definition; trace the listed orders in the source.",
                 limit="File differences alone cannot establish missing sales, refunds, profit or cause.")
 
 
@@ -132,10 +152,14 @@ def handoff(report):
             source = change[side]
             details.append(f"{side} line {source['line']}, {money(source['minor'])}, {source['utc']}" if source else f"{side} absent")
         print(f"{change['order']} | {change['kind']} | {money(change['delta_minor'])} | " + " | ".join(details))
-    if any(c["kind"] != "changed" for c in shown):
-        print("One-sided orders: search the order in the source store and compare export filters before calling it missing.")
-    if any(c["kind"] == "changed" and c["delta_minor"] for c in shown):
-        print("Amount changes: inspect the order history and refund transactions before assigning a cause.")
+    groups = report["review_groups"]
+    if groups:
+        print("Review across all differing orders (suggested owners):")
+        for kind, group in groups.items():
+            count = group["count"]
+            label = kind.replace("_", " ").capitalize()
+            print(f"{label} | {count} {'order' if count == 1 else 'orders'} | increases {money(group['increase_minor'])}, "
+                  f"decreases {money(group['decrease_minor'])} | {group['suggested_role']} | {group['next_check']}")
     print(report["next_check"])
     print(report["limit"])
 

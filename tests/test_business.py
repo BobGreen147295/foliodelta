@@ -114,3 +114,22 @@ class BusinessChecks(unittest.TestCase):
         self.assertNotIn("O01 |", summary.stdout)
         r = self.result(left, right)
         self.assertEqual((len(r["changes"]), r["delta_minor"]), (12, 7800))
+
+    def test_merchant_review_groups_include_offsets_and_rows_below_display_limit(self):
+        left_rows = [(str(i), STAMP, "10", "USD") for i in range(12)]
+        right_rows = [(str(i), STAMP, "11" if i < 5 else "9", "USD") for i in range(10)]
+        right_rows += [("10", "2026-05-02T00:00:00Z", "10", "USD"), ("new", STAMP, "10", "USD")]
+        left, right = self.write("a", left_rows), self.write("b", right_rows)
+        r = self.result(left, right)
+        self.assertEqual(r["delta_minor"], 0)
+        observed = {k: (g["count"], g["increase_minor"], g["decrease_minor"])
+                    for k, g in r["review_groups"].items()}
+        self.assertEqual(observed, {"amount_changed": (10, 500, -500), "time_only": (1, 0, 0),
+                                    "left_only": (1, 0, -1000), "right_only": (1, 1000, 0)})
+        self.assertEqual(sum(g["count"] for g in r["review_groups"].values()), len(r["changes"]))
+        text = self.run_cli(left, right)
+        self.assertEqual(text.returncode, 0)
+        self.assertIn("Time only | 1 order |", text.stdout)
+        self.assertIn("Reporting operations", text.stdout)
+        self.assertIn("successful refund transactions", text.stdout)
+        self.assertEqual(self.result(left, left)["review_groups"], {})

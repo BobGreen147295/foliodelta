@@ -15,4 +15,6 @@ Output covers order presence, recorded total and creation time only. A change in
 
 The English handoff shows up to ten orders ranked by absolute difference. The JSON includes every changed record, including time-only changes. Totals in both formats cover the entire input.
 
+`review_groups` covers all changed orders once. One-sided rows are grouped by side even if their amount is zero. For orders present on both sides an amount change takes precedence over a simultaneous timestamp change. Within each group, `increase_minor` is nonnegative and `decrease_minor` is signed and nonpositive. Their sum across groups is the reported right-minus-left delta. Suggested roles are unassigned.
+
 Shopify documents that additional line items appear on separate rows with many fields blank. Confirm the exported layout when a shop uses a custom reporting app. [Shopify order exports](https://help.shopify.com/en/manual/fulfillment/managing-orders/exporting-orders)
