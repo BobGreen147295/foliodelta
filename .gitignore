@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.data/
+.env
+.env.*
+*.csv
+!skills/foliodelta/examples/*.csv

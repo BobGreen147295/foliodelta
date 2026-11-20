@@ -1,0 +1,4 @@
+interface:
+  display_name: "FolioDelta"
+  short_description: "Trace order export differences to source rows"
+  default_prompt: "Use $foliodelta to compare the two order exports and draft an evidence-based English handoff."
