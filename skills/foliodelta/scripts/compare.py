@@ -124,6 +124,23 @@ def refund_review(left, right):
                 limit="Recorded amounts on comparable orders only. Confirm transfer status and date with payment transactions.")
 
 
+def first_order_check(left, right, shared, changes):
+    if not left or not right:
+        empty_side = "left" if not left else "right"
+        return f"The {empty_side} export has no order rows. Check its window and status filters in the store."
+    if not shared:
+        return ("No order keys match. Verify the store, export windows and identifier format "
+                "on both files before investigating individual orders.")
+    if not changes:
+        return "The compared order keys, totals and creation times agree. Verify export coverage before closing the review."
+    first = changes[0]
+    lines = " and ".join(f"{side} line {first[side]['line']}" for side in ("left", "right") if first[side])
+    category = first["kind"]
+    if category == "changed":
+        category = "amount_changed" if first["delta_minor"] else "time_only"
+    return f"Start with {first['order']} ({lines}). {REVIEW_STEPS[category][1]}"
+
+
 def compare(left_path, right_path, confirmed=False, review_refunds=False):
     left, lu = read_orders(left_path, "left", review_refunds)
     right, ru = read_orders(right_path, "right", review_refunds)
@@ -156,10 +173,12 @@ def compare(left_path, right_path, confirmed=False, review_refunds=False):
         group["decrease_minor"] += min(0, delta)
     left_total = sum(record[1] for record in left.values())
     right_total = sum(record[1] for record in right.values())
+    shared = len(left.keys() & right.keys())
     report = dict(schema="foliodelta/1", scope="operator_declared" if confirmed else "unconfirmed",
                 currency=lu or ru, precision=PRECISION[lu or ru], left_count=len(left), right_count=len(right),
                 left_minor=left_total, right_minor=right_total, delta_minor=right_total-left_total,
-                changes=changes, review_groups=groups, next_check="Verify export filters, window, status and total definition; trace the listed orders in the source.",
+                key_overlap=dict(shared=shared, left_only=len(left)-shared, right_only=len(right)-shared),
+                changes=changes, review_groups=groups, next_check=first_order_check(left, right, shared, changes),
                 limit="File differences alone cannot establish missing sales, refunds, profit or cause.")
     if review_refunds:
         report["recorded_refunds"] = refund_review(left, right)
@@ -179,6 +198,9 @@ def handoff(report):
     print(f"Left ({report['left_count']} orders): {money(report['left_minor'])}")
     print(f"Right ({report['right_count']} orders): {money(report['right_minor'])}")
     print("Right minus left:", money(report["delta_minor"]))
+    overlap = report["key_overlap"]
+    print(f"Order keys in both: {overlap['shared']} | left only: {overlap['left_only']} | right only: {overlap['right_only']}")
+    print("First order check:", report["next_check"])
     print("Changed or one-sided orders:", len(report["changes"]))
     shown = report["changes"][:10]
     if len(shown) < len(report["changes"]):
@@ -197,7 +219,6 @@ def handoff(report):
             label = kind.replace("_", " ").capitalize()
             print(f"{label} | {count} {'order' if count == 1 else 'orders'} | increases {money(group['increase_minor'])}, "
                   f"decreases {money(group['decrease_minor'])} | {group['suggested_role']} | {group['next_check']}")
-    print(report["next_check"])
     print(report["limit"])
     if "recorded_refunds" in report:
         refunds = report["recorded_refunds"]

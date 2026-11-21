@@ -23,4 +23,6 @@ For a team handoff, use the full-file `review_groups` to account for increases, 
 
 For the bundled demo label all data fictional. Business files and reports stay with the operator; confirm the intended recipient before sharing externally. Using a cloud coding agent may send tool output to its provider. For sensitive files run the CLI locally and share only approved aggregate findings.
 
+Read `key_overlap` before interpreting single-sided records. When both files contain orders but share zero keys, ask for the store, identifier convention and export windows first. Keep the literal keys and file-level differences visible; a similar-looking name is insufficient to merge two records. With shared keys, use `next_check` to name a concrete order and source line. The optional refund section answers a separate question.
+
 For a refund question involving two native Shopify exports, add `--review-refunds`. Report the change in recorded refunds on comparable orders separately from the order-total difference. State how many matched orders have blank values and how many one-sided orders were excluded. If the required column is absent, offer the ordinary order comparison and request the missing field. Confirm whether money moved with the original payment transactions.

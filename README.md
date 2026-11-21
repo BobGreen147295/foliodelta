@@ -24,6 +24,8 @@ The totals are 169.75 and 123.25 USD. Those three changes account for the −46.
 
 For a team handoff, the report also groups **all** affected orders, including those beyond the first ten displayed. Each group shows its count, increases and decreases separately, a suggested colleague and the evidence to request. This makes offsetting changes visible even when the grand total matches. [Merchant handoff scenarios](skills/foliodelta/references/merchant-handoff.md)
 
+The handoff starts with the number of order keys shared by both files and the counts unique to each side. When both have orders but no keys match, the first check is the store, identifier format and export windows. Otherwise the demo points the operator to DEMO-721 on line 4 of the left file.
+
 ### Review recorded refunds
 
 To check the refund explanation in the same demo, rerun the command above with `--review-refunds`. DEMO-722 has the same 25.00 USD order total on both sides, while its recorded refund changes from 0.00 to 6.25 USD. Two shared orders have comparable refund values; two one-sided orders are excluded. The 6.25 USD observation is separate from the −46.50 USD order-total difference. Payment status and date still require the underlying transactions.

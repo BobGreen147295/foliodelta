@@ -57,6 +57,33 @@ class BusinessChecks(unittest.TestCase):
         self.assertEqual(r["delta_minor"], 0)
         self.assertEqual([d["delta_minor"] for d in r["changes"]], [100, -100, 0])
 
+    def test_no_shared_keys_routes_to_export_scope_even_if_totals_and_scope_match(self):
+        a = self.write("a", [("#101", STAMP, "25", "USD")])
+        b = self.write("b", [("101", STAMP, "25", "USD")])
+        r = self.result(a, b, "--scope-confirmed")
+        self.assertEqual(r["delta_minor"], 0)
+        self.assertEqual(r["key_overlap"], {"shared": 0, "left_only": 1, "right_only": 1})
+        self.assertIn("identifier", r["next_check"])
+        self.assertIn("store", r["next_check"])
+        self.assertEqual(len(r["changes"]), 2)
+        text = self.run_cli(a, b)
+        self.assertEqual(text.returncode, 0)
+        self.assertIn(r["next_check"], text.stdout)
+
+    def test_first_check_uses_source_lines_and_handles_empty_and_identical_inputs(self):
+        a, b = [SKILL / "examples" / name for name in ("before.csv", "after.csv")]
+        r = self.result(a, b)
+        self.assertEqual(r["key_overlap"], {"shared": 2, "left_only": 1, "right_only": 1})
+        self.assertIn("DEMO-721", r["next_check"])
+        self.assertIn("left line 4", r["next_check"])
+        self.assertIn("right", r["next_check"])
+        same = self.result(a, a)
+        self.assertEqual(same["key_overlap"]["shared"], 3)
+        self.assertIn("coverage", same["next_check"])
+        empty = self.write("empty", [])
+        self.assertIn("left export has no order rows", self.result(empty, b)["next_check"])
+        self.assertIn("right export has no order rows", self.result(a, empty)["next_check"])
+
     def test_refund_only_change_keeps_order_total_report_intact(self):
         paths = [SKILL / "examples" / name for name in ("before.csv", "after.csv")]
         report = self.result(*paths, "--review-refunds")

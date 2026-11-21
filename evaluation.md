@@ -24,6 +24,12 @@ Use a shop's already-open discrepancy, with permission. Record the operator's us
 
 Implementation, skill text and fictional examples were written for this project.
 
+## First-check routing, 21 November 2026
+
+Two exports can each contain one 25 USD order, yet one file uses `#101` and the other `101`. With exact matching the monetary delta is zero and there are two one-sided rows. An automated regression verifies that the handoff preserves both rows and asks the operator to check the identifier convention, store and window. A separate case verifies that an ordinary partial match names the highest-impact order and its source line. These checks exercise synthetic files.
+
+The distinct-key comparison in [csv-diff](https://github.com/simonw/csv-diff) and the matched/unmatched set operations in [qsv join](https://github.com/dathere/qsv/blob/master/src/cmd/join.rs) informed the coverage counts. FolioDelta uses its existing local parser.
+
 ## Merchant operations review, 20 November 2026
 
 Stars below were observed through GitHub's repository API. They apply to each repository; adoption by individual merchant teams is unknown.
