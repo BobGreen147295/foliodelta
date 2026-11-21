@@ -1,0 +1,6 @@
+Name,Created at,Total,Currency,Lineitem name,Refunded Amount,Financial Status
+CASE-541,2026-05-02 10:00:00 -0400,78.40,USD,Demo bundle,0.00,paid
+CASE-541,,,,Demo insert,,
+CASE-542,2026-05-03 11:15:00 -0400,52.00,USD,Demo pouch,0.00,paid
+CASE-543,2026-05-04 09:10:00 -0400,34.00,USD,Demo mug,5.00,partially_refunded
+CASE-544,2026-05-05 14:30:00 -0400,20.00,USD,Demo cap,0.00,paid

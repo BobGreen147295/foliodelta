@@ -1,0 +1,19 @@
+Order reconciliation | scope: unconfirmed
+Left (4 orders): 184.40 USD
+Right (4 orders): 154.90 USD
+Right minus left: -29.50 USD
+Order keys in both: 3 | left only: 1 | right only: 1
+First order check: Start with CASE-542 (left line 4). Find the order in the source store and check the right export's filters and cutoff.
+Changed or one-sided orders: 3
+CASE-542 | left_only | -52.00 USD | left line 4, 52.00 USD, 2026-05-03T15:15:00+00:00 | right absent
+CASE-545 | right_only | 35.00 USD | left absent | right line 2, 35.00 USD, 2026-05-06T16:20:00+00:00
+CASE-541 | changed | -12.50 USD | left line 2, 78.40 USD, 2026-05-02T14:00:00+00:00 | right line 4, 65.90 USD, 2026-05-02T14:00:00+00:00
+Review across all differing orders (suggested owners):
+Left only | 1 order | increases 0.00 USD, decreases -52.00 USD | Order operations | Find the order in the source store and check the right export's filters and cutoff.
+Right only | 1 order | increases 35.00 USD, decreases 0.00 USD | Order operations | Find the order in the source store and check the left export's filters and cutoff.
+Amount changed | 1 order | increases 0.00 USD, decreases -12.50 USD | Payments or order operations | Compare the order edit history and successful refund transactions by order, amount and currency.
+File differences alone cannot establish missing sales, refunds, profit or cause.
+Recorded refund change on comparable orders: 8.25 USD
+Comparable: 3 | amounts changed: 1 | matched with blanks: 0 | one-sided excluded: 2
+CASE-543 | left line 5: 5.00 USD | right line 3: 13.25 USD | change 8.25 USD
+Recorded amounts on comparable orders only. Confirm transfer status and date with payment transactions.
