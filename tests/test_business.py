@@ -57,6 +57,47 @@ class BusinessChecks(unittest.TestCase):
         self.assertEqual(r["delta_minor"], 0)
         self.assertEqual([d["delta_minor"] for d in r["changes"]], [100, -100, 0])
 
+    def test_refund_only_change_keeps_order_total_report_intact(self):
+        paths = [SKILL / "examples" / name for name in ("before.csv", "after.csv")]
+        report = self.result(*paths, "--review-refunds")
+        refunds = report.pop("recorded_refunds")
+        self.assertEqual(report, self.result(*paths))
+        self.assertEqual((refunds["comparable"], refunds["one_sided"], refunds["comparable_delta_minor"]), (2, 2, 625))
+        self.assertEqual(refunds["changes"], [dict(order="DEMO-722", left_line=5, right_line=4,
+                                                    left_minor=0, right_minor=625, delta_minor=625)])
+        text = self.run_cli(*paths, "--review-refunds")
+        self.assertEqual(text.returncode, 0)
+        self.assertIn("DEMO-722 | left line 5: 0.00 USD | right line 4: 6.25 USD", text.stdout)
+        self.assertIn("one-sided excluded: 2", text.stdout)
+
+    def test_refund_blank_is_unknown_and_empty_overlap_has_no_delta(self):
+        header = ["Name", "Created at", "Total", "Currency", "Refunded Amount"]
+        a = self.write("a", [("X", STAMP, "5", "KWD", "")], header)
+        b = self.write("b", [("X", STAMP, "5", "KWD", "0.125")], header)
+        refunds = self.result(a, b, "--review-refunds")["recorded_refunds"]
+        self.assertIsNone(refunds["comparable_delta_minor"])
+        self.assertEqual(refunds["missing_values"], [dict(order="X", left_line=2, right_line=2,
+                                                         left_minor=None, right_minor=125)])
+        empty = self.write("empty", [], header)
+        excluded = self.result(b, empty, "--review-refunds")["recorded_refunds"]
+        self.assertEqual((excluded["one_sided"], excluded["comparable_delta_minor"]), (1, None))
+        self.assertEqual(self.result(b, b, "--review-refunds")["recorded_refunds"]["comparable_delta_minor"], 0)
+
+    def test_refund_mode_rejects_missing_column_bad_precision_and_ambiguous_item(self):
+        base = ["Name", "Created at", "Total", "Currency", "Lineitem name"]
+        order = ["X", STAMP, "5", "USD", "Item"]
+        for header, rows, line in [
+            (base, [order], 1),
+            (base + ["Refunded Amount"], [order + ["0.001"]], 2),
+            (base + ["Refunded Amount"], [order + ["0.00"], ["X", "", "", "", "Item 2", "1.00"]], 3),
+        ]:
+            with self.subTest(line=line):
+                a = self.write("a", rows, header)
+                run = self.run_cli(a, a, "--review-refunds", "--json")
+                self.assertEqual((run.returncode, run.stdout), (2, ""))
+                self.assertIn(f"left, line {line}", run.stderr)
+                self.assertEqual(self.run_cli(a, a).returncode, 0)
+
     def test_timezone_and_physical_lines_with_unused_private_columns(self):
         left = self.write("a", [("A", STAMP, "1", "EUR", "example\nprivate value"),
                                 ("B", STAMP, "2", "EUR", "secret field")], HEADER + ["customer note"])

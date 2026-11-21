@@ -1,5 +1,5 @@
-Name,Created at,Total,Currency,Lineitem name
-DEMO-720,2026-04-02 09:30:00 -0400,84.75,USD,Sample kit
-DEMO-720,,,,Sample refill
-DEMO-721,2026-04-03 14:10:00 -0400,60.00,USD,Sample tote
-DEMO-722,2026-04-04 08:15:00 -0400,25.00,USD,Sample case
+Name,Created at,Total,Currency,Lineitem name,Refunded Amount
+DEMO-720,2026-04-02 09:30:00 -0400,84.75,USD,Sample kit,2.00
+DEMO-720,,,,Sample refill,
+DEMO-721,2026-04-03 14:10:00 -0400,60.00,USD,Sample tote,0.00
+DEMO-722,2026-04-04 08:15:00 -0400,25.00,USD,Sample case,0.00

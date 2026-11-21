@@ -11,7 +11,9 @@ Order names are case-sensitive. Use the same store and order naming scheme on bo
 
 Amounts use a decimal point and no thousands separators. Supported currencies are USD, EUR, GBP, CAD, AUD, NZD, CHF, SGD, HKD and CNY at two decimal places, JPY at zero and KWD at three. Trailing zeroes may exceed the currency precision. Values with nonzero excess precision are rejected. The two files must use one currency. Creation times require a numeric UTC offset or Z; equal instants in different time zones match. A validated header-only file can be compared to a populated file; two empty files have no currency.
 
-Output covers order presence, recorded total and creation time only. A change in item mix with the same order summary is outside this contract. Refund totals, payment settlements, fees and fulfillment require separate sources. Eligibility for payout and why a difference occurred remain open.
+Default output covers order presence, recorded total and creation time. A change in item mix with the same order summary is outside this contract.
+
+With `--review-refunds`, both native exports need the `Refunded Amount` column. The additional `recorded_refunds` JSON section compares the field on shared order names when both values are numeric. A blank is unknown, an explicit zero is known, and one-sided orders are excluded. A nonempty refund on a continuation row is ambiguous and stops the review. The net change covers comparable orders only; with none it is null. Positive and negative changes describe right minus left. The text shows up to ten changed refund values; JSON includes every changed value and both source lines for matched orders with blanks. Payment success, timing, settlement and the reason for a difference require transaction evidence.
 
 The English handoff shows up to ten orders ranked by absolute difference. The JSON includes every changed record, including time-only changes. Totals in both formats cover the entire input.
 
