@@ -1,5 +1,7 @@
 # What has been tested
 
+[Forwarding a finance reply](evaluations/finance-reply-trial/results.md) tracks which original CSV references survived an independent recipient’s first reply.
+
 [Finance recipient walkthrough, 21 November 2026](evaluations/recipient-2026-11-21/results.md) records a separate agent acting on an actual generated handoff and two fictional CSVs. Its first English reply and one follow-up are available for inspection.
 
 The first user is an operator already responsible for explaining conflicting order exports to finance or a shop owner. The deliverable is a ranked list of records and source lines plus the next evidence check. This allows a colleague to open the relevant rows directly.

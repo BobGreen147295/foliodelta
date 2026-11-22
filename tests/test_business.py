@@ -57,6 +57,32 @@ class BusinessChecks(unittest.TestCase):
         self.assertEqual(r["delta_minor"], 0)
         self.assertEqual([d["delta_minor"] for d in r["changes"]], [100, -100, 0])
 
+    def test_finance_reply_preserves_regenerable_source_citations(self):
+        packet = SKILL.parents[1] / "evaluations" / "finance-reply-trial" / "v2" / "packet"
+        args = (packet / "morning.csv", packet / "afternoon.csv")
+        reply = self.run_cli(*args, "--review-refunds", "--finance-reply")
+        self.assertEqual(reply.returncode, 0, reply.stderr)
+        self.assertEqual(reply.stdout, (packet / "draft.txt").read_text(encoding="utf-8"))
+        self.assertNotIn(str(packet), reply.stdout)
+        self.assertIn('"morning.csv" line 3 (85.00 GBP', reply.stdout)
+        self.assertIn('"afternoon.csv" line 4 (6.00 GBP)', reply.stdout)
+        self.assertIn('WAVE-819 order [left "morning.csv" L3]', reply.stdout.splitlines()[-1])
+        self.assertIn('WAVE-817 refund [left "morning.csv" L2, right "afternoon.csv" L4]', reply.stdout.splitlines()[-1])
+        self.assertIn("Export scope is unconfirmed", reply.stdout)
+        self.assertEqual(self.run_cli(*args, "--json", "--finance-reply").returncode, 2)
+
+    def test_finance_reply_caps_examples_preserves_totals_and_labels_demo(self):
+        rows = [(str(i), STAMP, str(i), "USD") for i in range(1, 7)]
+        left, right = self.write("early.csv", rows), self.write("late.csv", [])
+        reply = self.run_cli(left, right, "--finance-reply")
+        self.assertEqual(reply.returncode, 0)
+        self.assertIn("3 of 6 differing orders", reply.stdout)
+        self.assertIn("-21.00 USD", reply.stdout)
+        self.assertNotIn("Recorded refund change", reply.stdout)
+        demo = self.run_cli(SKILL / "examples/before.csv", SKILL / "examples/after.csv", "--finance-reply")
+        self.assertEqual(demo.returncode, 0)
+        self.assertIn("Fictional demo orders", demo.stdout)
+
     def test_no_shared_keys_routes_to_export_scope_even_if_totals_and_scope_match(self):
         a = self.write("a", [("#101", STAMP, "25", "USD")])
         b = self.write("b", [("101", STAMP, "25", "USD")])

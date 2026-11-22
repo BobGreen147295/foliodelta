@@ -1,0 +1,11 @@
+Finance, the left file "morning.csv" totals 152.50 GBP; the right file "afternoon.csv" totals 92.50 GBP. The file difference is -60.00 GBP (right minus left).
+Order evidence (3 of 3 differing orders, largest absolute change first):
+- WAVE-819: -85.00 GBP; left "morning.csv" line 3 (85.00 GBP, 2026-07-06T08:10:00+00:00); right "afternoon.csv" has no matching order key.
+- WAVE-821: 30.00 GBP; left "morning.csv" has no matching order key; right "afternoon.csv" line 3 (30.00 GBP, 2026-07-06T12:45:00+00:00).
+- WAVE-820: -5.00 GBP; left "morning.csv" line 5 (27.50 GBP, 2026-07-06T09:00:00+00:00); right "afternoon.csv" line 2 (22.50 GBP, 2026-07-06T09:00:00+00:00).
+Recorded refund change: 4.00 GBP across 2 comparable orders; 0 matched with blanks, 2 one-sided excluded.
+- WAVE-817 recorded refunds: left "morning.csv" line 2 (2.00 GBP) to right "afternoon.csv" line 4 (6.00 GBP).
+Payments: verify transaction status, amount, currency and date before confirming any transfer.
+Order Operations: Start with WAVE-819 (left line 3). Find the order in the source store and check the right export's filters and cutoff.
+Export scope is unconfirmed. The arithmetic can be checked from the files; business closure needs source evidence.
+Source references (retain this line when forwarding): WAVE-819 order [left "morning.csv" L3] | WAVE-817 refund [left "morning.csv" L2, right "afternoon.csv" L4]

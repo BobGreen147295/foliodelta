@@ -185,7 +185,51 @@ def compare(left_path, right_path, confirmed=False, review_refunds=False):
     return report
 
 
-def handoff(report):
+def finance_reply(report, files, money):
+    left, right = [json.dumps(name, ensure_ascii=not name.isprintable()) for name in files]
+    references = []
+    print(f"Finance, the left file {left} totals {money(report['left_minor'])}; "
+          f"the right file {right} totals {money(report['right_minor'])}. "
+          f"The file difference is {money(report['delta_minor'])} (right minus left).")
+    changes = report["changes"]
+    if changes:
+        print(f"Order evidence ({min(3, len(changes))} of {len(changes)} differing orders, largest absolute change first):")
+    for item in changes[:3]:
+        citations = []
+        locations = []
+        for side, name in (("left", left), ("right", right)):
+            source = item[side]
+            citation = f"{side} {name}"
+            if source:
+                citation += f" line {source['line']} ({money(source['minor'])}, {source['utc']})"
+                locations.append(f"{side} {name} L{source['line']}")
+            else:
+                citation += " has no matching order key"
+            citations.append(citation)
+        print(f"- {item['order']}: {money(item['delta_minor'])}; " + "; ".join(citations) + ".")
+        if not references:
+            references.append(f"{item['order']} order [{', '.join(locations)}]")
+    refunds = report.get("recorded_refunds")
+    if refunds is not None:
+        delta = refunds["comparable_delta_minor"]
+        print(f"Recorded refund change: {money(delta) if delta is not None else 'unknown'} across "
+              f"{refunds['comparable']} comparable orders; {len(refunds['missing_values'])} matched with blanks, "
+              f"{refunds['one_sided']} one-sided excluded.")
+        for item in refunds["changes"][:2]:
+            print(f"- {item['order']} recorded refunds: left {left} line {item['left_line']} "
+                  f"({money(item['left_minor'])}) to right {right} line {item['right_line']} ({money(item['right_minor'])}).")
+            references.append(f"{item['order']} refund [left {left} L{item['left_line']}, right {right} L{item['right_line']}]")
+        if len(refunds["changes"]) > 2:
+            print(f"Showing two of {len(refunds['changes'])} changed refund records.")
+        print("Payments: verify transaction status, amount, currency and date before confirming any transfer.")
+    print("Order Operations:", report["next_check"])
+    scope = "operator-declared" if report["scope"] == "operator_declared" else "unconfirmed"
+    print(f"Export scope is {scope}. The arithmetic can be checked from the files; business closure needs source evidence.")
+    if references:
+        print("Source references (retain this line when forwarding): " + " | ".join(references))
+
+
+def handoff(report, reply_files=None):
     def money(minor):
         scale = report["precision"]
         whole, fraction = divmod(abs(minor), 10**scale)
@@ -194,6 +238,9 @@ def handoff(report):
 
     if report.get("sample") == "bundled_fictional":
         print("Fictional demo orders")
+    if reply_files is not None:
+        finance_reply(report, reply_files, money)
+        return
     print("Order reconciliation | scope:", report["scope"])
     print(f"Left ({report['left_count']} orders): {money(report['left_minor'])}")
     print(f"Right ({report['right_count']} orders): {money(report['right_minor'])}")
@@ -239,7 +286,9 @@ def main():
     parser.add_argument("left", type=Path)
     parser.add_argument("right", type=Path)
     parser.add_argument("--scope-confirmed", action="store_true", help="operator confirmed same store, window, filters and amount definition")
-    parser.add_argument("--json", action="store_true", help="write machine-readable evidence to stdout")
+    formats = parser.add_mutually_exclusive_group()
+    formats.add_argument("--json", action="store_true", help="write machine-readable evidence to stdout")
+    formats.add_argument("--finance-reply", action="store_true", help="draft a short English reply citing CSV filenames and physical lines")
     parser.add_argument("--review-refunds", action="store_true", help="compare recorded Refunded Amount on matched Shopify orders")
     args = parser.parse_args()
     try:
@@ -252,7 +301,9 @@ def main():
     if args.json:
         print(json.dumps(result, ensure_ascii=True, indent=2))
     else:
-        handoff(result)
+        if args.finance_reply:
+            sys.stdout.reconfigure(encoding="utf-8")
+        handoff(result, (args.left.name, args.right.name) if args.finance_reply else None)
 
 
 if __name__ == "__main__":

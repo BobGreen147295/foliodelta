@@ -1,0 +1,5 @@
+Name,Created at,Total,Currency,Lineitem name,Refunded Amount,Financial Status
+WAVE-817,2026-07-06T07:05:00Z,40.00,GBP,Sample cup,2.00,partially_refunded
+WAVE-819,2026-07-06T08:10:00Z,85.00,GBP,Sample kit,0.00,paid
+WAVE-819,,,,Sample insert,,
+WAVE-820,2026-07-06T09:00:00Z,27.50,GBP,Sample notebook,0.00,paid

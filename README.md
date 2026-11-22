@@ -49,7 +49,10 @@ Start with two exports you are authorized to compare. The files can be outside t
 ```sh
 python skills/foliodelta/scripts/compare.py "first export.csv" "second export.csv" > handoff.txt
 python skills/foliodelta/scripts/compare.py "first export.csv" "second export.csv" --json
+python skills/foliodelta/scripts/compare.py "first export.csv" "second export.csv" --finance-reply --review-refunds
 ```
+
+The English finance draft cites file basenames and physical lines next to up to three order differences and two refund examples. Totals cover the full comparison. Omit `--review-refunds` when the exports lack the native refund column. Review the draft locally before forwarding.
 
 1. The operator checks store identity, time window and zone, order status filters, order ID meaning, and amount definition. Leave scope unconfirmed until these agree. Add `--scope-confirmed` to record the operator's declaration.
 2. Open the listed source lines, starting with the largest differences. Follow up on time-only changes even if the grand total matches. A comparison error exits with status 2 and emits no report to stdout.

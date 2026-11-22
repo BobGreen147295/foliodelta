@@ -1,0 +1,5 @@
+Name,Created at,Total,Currency,Lineitem name,Refunded Amount,Financial Status
+TRIAL-784,2026-06-01T12:00:00Z,91.00,CAD,Demo kit,0.00,paid
+TRIAL-784,,,,Demo insert,,
+TRIAL-786,2026-06-02T13:00:00Z,30.00,CAD,Demo cup,1.00,partially_refunded
+TRIAL-785,2026-06-03T09:00:00Z,46.00,CAD,Demo scarf,0.00,paid

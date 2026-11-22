@@ -1,0 +1,10 @@
+Finance — the left file "opening.csv" totals 167.00 CAD; the right file "closing.csv" totals 112.00 CAD. The file difference is -55.00 CAD (right minus left).
+Order evidence (3 of 3 differing orders, largest absolute change first):
+- TRIAL-785: -46.00 CAD; left "opening.csv" line 5 (46.00 CAD, 2026-06-03T09:00:00+00:00); right "closing.csv" has no matching order key.
+- TRIAL-784: -21.00 CAD; left "opening.csv" line 2 (91.00 CAD, 2026-06-01T12:00:00+00:00); right "closing.csv" line 3 (70.00 CAD, 2026-06-01T12:00:00+00:00).
+- TRIAL-787: 12.00 CAD; left "opening.csv" has no matching order key; right "closing.csv" line 2 (12.00 CAD, 2026-06-04T08:30:00+00:00).
+Recorded refund change: 6.50 CAD across 2 comparable orders; 0 matched with blanks, 2 one-sided excluded.
+- TRIAL-786 recorded refunds: left "opening.csv" line 4 (1.00 CAD) to right "closing.csv" line 4 (7.50 CAD).
+Payments: verify transaction status, amount, currency and date before confirming any transfer.
+Order Operations: Start with TRIAL-785 (left line 5). Find the order in the source store and check the right export's filters and cutoff.
+Export scope is unconfirmed. The arithmetic can be checked from the files; business closure needs source evidence.
